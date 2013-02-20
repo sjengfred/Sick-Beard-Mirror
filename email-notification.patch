@@ -1,0 +1,1404 @@
+From 8f7215c65cd7d08a8678165e5e6af77f6e718286 Mon Sep 17 00:00:00 2001
+From: schumi2004 <schumi2004@gmail.com>
+Date: Tue, 12 Feb 2013 12:34:29 +0100
+Subject: [PATCH] Email Notifications by xombiemp
+
+---
+ data/images/notifiers/email.png                   |  Bin 0 -> 4258 bytes
+ data/interfaces/default/config_notifications.tmpl |  124 ++++
+ data/js/config.js                                 |    3 +-
+ data/js/configNotifications.js                    |   68 +-
+ email.patch                                       |  706 +++++++++++++++++++++
+ sickbeard/__init__.py                             |   34 +
+ sickbeard/databases/mainDB.py                     |    8 +
+ sickbeard/notifiers/__init__.py                   |    3 +
+ sickbeard/notifiers/emailnotify.py                |  133 ++++
+ sickbeard/webserve.py                             |   65 +-
+ 10 files changed, 1141 insertions(+), 3 deletions(-)
+ create mode 100644 data/images/notifiers/email.png
+ create mode 100644 email.patch
+ create mode 100644 sickbeard/notifiers/emailnotify.py
+
+diff --git a/data/images/notifiers/email.png b/data/images/notifiers/email.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..ee3fa70755bc66a9710193c44c35e5816b42d46e
+GIT binary patch
+literal 4258
+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
+Eg2QVXivR!s
+
+literal 0
+HcmV?d00001
+
+diff --git a/data/interfaces/default/config_notifications.tmpl b/data/interfaces/default/config_notifications.tmpl
+index 826cf0a..bd86cca 100755
+--- a/data/interfaces/default/config_notifications.tmpl
++++ b/data/interfaces/default/config_notifications.tmpl
+@@ -753,6 +753,130 @@
+                 <h2>Online</h2>
+                 <br />
+ 
++                <div class="component-group clearfix">
++                    <div class="component-group-desc">
++                        <img class="notifier-icon" src="$sbRoot/images/notifiers/email.png" alt="" title="Email" />
++                        <h3><a href="http://en.wikipedia.org/wiki/Comparison_of_webmail_providers" onclick="window.open(this.href, '_blank'); return false;">Email</a></h3>
++                        <p>Allows configuration of email notifications on a per show basis.</p>
++                    </div>
++                    <fieldset class="component-group-list">
++                        <div class="field-pair">
++                            <input type="checkbox" class="enabler" name="use_email" id="use_email" #if $sickbeard.USE_EMAIL then "checked=\"checked\"" else ""# />
++                            <label class="clearfix" for="use_email">
++                                <span class="component-title">Enable</span>
++                                <span class="component-desc">Should Sick Beard send email notifications?</span>
++                            </label>
++                        </div>
++
++                        <div id="content_use_email">
++                            <div class="field-pair">
++                                <input type="checkbox" name="email_notify_onsnatch" id="email_notify_onsnatch" #if $sickbeard.EMAIL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
++                                <label class="clearfix" for="email_notify_onsnatch">
++                                    <span class="component-title">Notify on Snatch</span>
++                                    <span class="component-desc">Send notification when we start a download?</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <input type="checkbox" name="email_notify_ondownload" id="email_notify_ondownload" #if $sickbeard.EMAIL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
++                                <label class="clearfix" for="email_notify_ondownload">
++                                    <span class="component-title">Notify on Download</span>
++                                    <span class="component-desc">Send notification when we finish a download?</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">SMTP Host</span>
++                                    <input type="text" name="email_host" id="email_host" value="$sickbeard.EMAIL_HOST" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">Hostname of your SMTP email server.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">SMTP Port</span>
++                                    <input type="text" name="email_port" id="email_port" value="$sickbeard.EMAIL_PORT" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">The port number used to connect to your SMTP host.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">SMTP From</span>
++                                    <input type="text" name="email_from" id="email_from" value="$sickbeard.EMAIL_FROM" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">Sender email address; some hosts require a real address.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">Use TLS</span>
++                                    <input type="checkbox" name="email_tls" id="email_tls" #if $sickbeard.EMAIL_TLS then "checked=\"checked\"" else ""# size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">Check to use TLS encryption.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">SMTP User</span>
++                                    <input type="text" name="email_user" id="email_user" value="$sickbeard.EMAIL_USER" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">(Optional) Your SMTP server username.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">SMTP Password</span>
++                                    <input type="password" name="email_password" id="email_password" value="$sickbeard.EMAIL_PASSWORD" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">(Optional) Your SMTP server password.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">Global Email List</span>
++                                    <input type="text" name="email_list" id="email_list" value="$sickbeard.EMAIL_LIST" size="35" />
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">All emails here receive notifications for ALL shows.</span>
++                                </label>
++                            </div>
++                            <div class="field-pair">
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">Show Notification Lists</span>
++                                    <select name="email_show" id="email_show">
++                                        <option value="-1">-- Select a Show --</option>
++                                    </select>
++                                </label>
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <input style="margin-top: 3px;" type="text" name="email_show_list" id="email_show_list" size="35" />
++                                </label>
++
++                                <label class="nocheck clearfix">
++                                    <span class="component-title">&nbsp;</span>
++                                    <span class="component-desc">Configure per show notifications here.</span>
++                                </label>
++                            </div>                    
++
++                            <div class="testNotification" id="testEmail-result">Click below to test.</div>
++                            <input type="button" value="Test Email" id="testEmail" />
++                            <input type="submit" class="config_submitter" value="Save Changes" />
++                        </div><!-- /content_use_email //-->
++                    </fieldset>
++                </div><!-- /email component-group //-->
+ 
+                 <div class="component-group clearfix">
+                     <div class="component-group-desc">
+diff --git a/data/js/config.js b/data/js/config.js
+index 541d8d2..45db95e 100644
+--- a/data/js/config.js
++++ b/data/js/config.js
+@@ -47,4 +47,5 @@ function config_success() {
+         $(this).next().remove();
+         $(this).show();
+     });
+-}
+\ No newline at end of file
++    $('#email_show').trigger('notify');
++}
+diff --git a/data/js/configNotifications.js b/data/js/configNotifications.js
+index a9ed18f..ec65ab0 100644
+--- a/data/js/configNotifications.js
++++ b/data/js/configNotifications.js
+@@ -1,6 +1,7 @@
+ $(document).ready(function(){
+     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
+-
++    var notify_data = null;
++    
+     $('#testGrowl').click(function(){
+         $('#testGrowl-result').html(loading);
+         var growl_host = $("#growl_host").val();
+@@ -64,6 +65,42 @@ $(document).ready(function(){
+         $.get(sbRoot+"/home/testLibnotify",
+         function(message){ $('#testLibnotify-result').html(message); });
+     });
++
++    $('#testEmail').click(function () {
++        var status, host, port, tls, from, user, pwd, err, to;
++        status = $('#testEmail-result');
++        status.html(loading);
++        host = $("#email_host").val();
++        host = host.length > 0 ? host : null;
++        port = $("#email_port").val();
++        port = port.length > 0 ? port : null;
++        tls  = $("#email_tls").attr('checked') !== undefined ? 1 : 0;
++        from = $("#email_from").val();
++        from = from.length > 0 ? from : 'root@localhost';
++        user = $("#email_user").val().trim();
++        pwd = $("#email_password").val();
++        err = '';
++        if (host === null) {
++            err += '<li style="color: red;">You must specify an SMTP hostname!</li>';
++        }
++        if (port === null) {
++            err += '<li style="color: red;">You must specify an SMTP port!</li>';
++        } else if (port.match(/^\d+$/) === null || parseInt(port, 10) > 65535) {
++            err += '<li style="color: red;">SMTP port must be between 0 and 65535!</li>';
++        }
++        if (err.length > 0) {
++            err = '<ol>' + err + '</ol>';
++            status.html(err);
++        } else {
++            to = prompt('Enter an email address to send the test to:', null);
++            if (to === null || to.length === 0 || to.match(/.*@.*/) === null) {
++                status.html('<p style="color: red;">You must provide a recipient email address!</p>');
++            } else {
++                $.get(sbRoot + "/home/testEmail", {host: host, port: port, smtp_from: from, use_tls: tls, user: user, pwd: pwd, to: to},
++                    function (msg) { $('#testEmail-result').html(msg); });
++            }
++        }
++    });
+   
+     $('#twitterStep1').click(function(){
+         $('#testTwitter-result').html(loading);
+@@ -142,4 +179,33 @@ $(document).ready(function(){
+         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+         function (data){ $('#testNMA-result').html(data); });
+     });
++
++    $('#email_show').change(function () {
++        var key = parseInt($('#email_show').val(), 10);
++        $('#email_show_list').val(key >= 0 ? notify_data[key.toString()].list : '');
++    });
++
++    // Update the internal data struct anytime settings are saved to the server
++    $('#email_show').bind('notify', function () { load_show_notify_lists(); });
++
++    function load_show_notify_lists() {
++        $.get(sbRoot + "/home/loadShowNotifyLists", function (data) {
++            var list, html, s;
++            list = $.parseJSON(data);
++            notify_data = list;
++            if (list._size === 0) {
++                return;
++            }
++            html = '<option value="-1">-- Select --</option>';
++            for (s in list) {
++                if (s.charAt(0) !== '_') {
++                    html += '<option value="' + list[s].id + '">' + $('<div/>').text(list[s].name).html() + '</option>';
++                }
++            }
++            $('#email_show').html(html);
++            $('#email_show_list').val('');
++        });
++    }
++    // Load the per show notify lists everytime this page is loaded
++    load_show_notify_lists();
+ });
+diff --git a/email.patch b/email.patch
+new file mode 100644
+index 0000000..c1e4453
+--- /dev/null
++++ b/email.patch
+@@ -0,0 +1,706 @@
++From ee346710c4c2af0bfea33d02e341b4ca4612d582 Mon Sep 17 00:00:00 2001
++From: Andrew Parker <andrewmichaelparker@gmail.com>
++Date: Fri, 25 Jan 2013 15:43:41 -0700
++Subject: [PATCH] Email Notifications
++
++"This patch provides email notifications, with support for TLS and SMTP
++AUTH. It provides the regular notifications on snatch and download. It
++provides the ability to give a list of "global" emails, which receive
++notifications for all shows and it also allows configuration of email
++notification lists on a per show basis."
++
++This is Sluggers pull request from
++https://github.com/midgetspy/Sick-Beard/pull/428
++
++I made the changes in the Development branch and changed a few things
++to get it to work with the current version of SickBeard.  I've tested
++it and it seems to be working great.
++---
++ data/images/notifiers/email.png                   |  Bin 0 -> 4258 bytes
++ data/interfaces/default/config_notifications.tmpl |  125 +++++++++++++++++++
++ data/js/config.js                                 |    1 +
++ data/js/configNotifications.js                    |   66 ++++++++++
++ sickbeard/__init__.py                             |   35 ++++++
++ sickbeard/databases/mainDB.py                     |    8 ++
++ sickbeard/notifiers/__init__.py                   |    3 +
++ sickbeard/notifiers/emailnotify.py                |  133 +++++++++++++++++++++
++ sickbeard/webserve.py                             |   63 +++++++++-
++ 9 files changed, 433 insertions(+), 1 deletion(-)
++ create mode 100644 data/images/notifiers/email.png
++ create mode 100644 sickbeard/notifiers/emailnotify.py
++
++diff --git a/data/images/notifiers/email.png b/data/images/notifiers/email.png
++new file mode 100644
++index 0000000000000000000000000000000000000000..ee3fa70755bc66a9710193c44c35e5816b42d46e
++GIT binary patch
++literal 4258
++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
++Eg2QVXivR!s
++
++literal 0
++HcmV?d00001
++
++diff --git a/data/interfaces/default/config_notifications.tmpl b/data/interfaces/default/config_notifications.tmpl
++index 826cf0a..797334b 100755
++--- a/data/interfaces/default/config_notifications.tmpl
+++++ b/data/interfaces/default/config_notifications.tmpl
++@@ -753,6 +753,131 @@
++                 <h2>Online</h2>
++                 <br />
++ 
+++                <div class="component-group clearfix">
+++                    <div class="component-group-desc">
+++                        <img class="notifier-icon" src="$sbRoot/images/notifiers/email.png" alt="" title="Email" />
+++                        <h3><a href="http://en.wikipedia.org/wiki/Comparison_of_webmail_providers" onclick="window.open(this.href, '_blank'); return false;">Email</a></h3>
+++                        <p>Allows configuration of email notifications on a per show basis.</p>
+++                    </div>
+++                    <fieldset class="component-group-list">
+++                        <div class="field-pair">
+++                            <input type="checkbox" class="enabler" name="use_email" id="use_email" #if $sickbeard.USE_EMAIL then "checked=\"checked\"" else ""# />
+++                            <label class="clearfix" for="use_email">
+++                                <span class="component-title">Enable</span>
+++                                <span class="component-desc">Should Sick Beard send email notifications?</span>
+++                            </label>
+++                        </div>
+++
+++                        <div id="content_use_email">
+++                            <div class="field-pair">
+++                                <input type="checkbox" name="email_notify_onsnatch" id="email_notify_onsnatch" #if $sickbeard.EMAIL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+++                                <label class="clearfix" for="email_notify_onsnatch">
+++                                    <span class="component-title">Notify on Snatch</span>
+++                                    <span class="component-desc">Send notification when we start a download?</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <input type="checkbox" name="email_notify_ondownload" id="email_notify_ondownload" #if $sickbeard.EMAIL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+++                                <label class="clearfix" for="email_notify_ondownload">
+++                                    <span class="component-title">Notify on Download</span>
+++                                    <span class="component-desc">Send notification when we finish a download?</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">SMTP Host</span>
+++                                    <input type="text" name="email_host" id="email_host" value="$sickbeard.EMAIL_HOST" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">Hostname of your SMTP email server.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">SMTP Port</span>
+++                                    <input type="text" name="email_port" id="email_port" value="$sickbeard.EMAIL_PORT" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">The port number used to connect to your SMTP host.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">SMTP From</span>
+++                                    <input type="text" name="email_from" id="email_from" value="$sickbeard.EMAIL_FROM" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">Sender email address; some hosts require a real address.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">Use TLS</span>
+++                                    <input type="checkbox" name="email_tls" id="email_tls" #if $sickbeard.EMAIL_TLS then "checked=\"checked\"" else ""# size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">Check to use TLS encryption.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">SMTP User</span>
+++                                    <input type="text" name="email_user" id="email_user" value="$sickbeard.EMAIL_USER" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">(Optional) Your SMTP server username.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">SMTP Password</span>
+++                                    <input type="password" name="email_password" id="email_password" value="$sickbeard.EMAIL_PASSWORD" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">(Optional) Your SMTP server password.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">Global Email List</span>
+++                                    <input type="text" name="email_list" id="email_list" value="$sickbeard.EMAIL_LIST" size="35" />
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">All emails here receive notifications for ALL shows.</span>
+++                                </label>
+++                            </div>
+++                            <div class="field-pair">
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">Show Notification Lists</span>
+++                                    <select name="email_show" id="email_show">
+++                                        <option value="-1">-- Select a Show --</option>
+++                                    </select>
+++                                </label>
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <input style="margin-top: 3px;" type="text" name="email_show_list" id="email_show_list" size="35" />
+++                                </label>
+++
+++                                <label class="nocheck clearfix">
+++                                    <span class="component-title">&nbsp;</span>
+++                                    <span class="component-desc">Configure per show notifications here.</span>
+++                                </label>
+++                            </div>                    
+++
+++                            <div class="testNotification" id="testEmail-result">Click below to test.</div>
+++                            <input type="button" value="Test Email" id="testEmail" />
+++                            <input type="submit" class="config_submitter" value="Save Changes" />
+++                        </div><!-- /content_use_email //-->
+++                    </fieldset>
+++                </div><!-- /email component-group //-->
+++
++ 
++                 <div class="component-group clearfix">
++                     <div class="component-group-desc">
++diff --git a/data/js/config.js b/data/js/config.js
++index 541d8d2..f323fcd 100644
++--- a/data/js/config.js
+++++ b/data/js/config.js
++@@ -47,4 +47,5 @@ function config_success() {
++         $(this).next().remove();
++         $(this).show();
++     });
+++    $('#email_show').trigger('notify');
++ }
++\ No newline at end of file
++diff --git a/data/js/configNotifications.js b/data/js/configNotifications.js
++index a9ed18f..1e1b73c 100644
++--- a/data/js/configNotifications.js
+++++ b/data/js/configNotifications.js
++@@ -1,5 +1,6 @@
++ $(document).ready(function(){
++     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
+++    var notify_data = null;
++ 
++     $('#testGrowl').click(function(){
++         $('#testGrowl-result').html(loading);
++@@ -64,6 +65,42 @@ $(document).ready(function(){
++         $.get(sbRoot+"/home/testLibnotify",
++         function(message){ $('#testLibnotify-result').html(message); });
++     });
+++
+++    $('#testEmail').click(function () {
+++        var status, host, port, tls, from, user, pwd, err, to;
+++        status = $('#testEmail-result');
+++        status.html(loading);
+++        host = $("#email_host").val();
+++        host = host.length > 0 ? host : null;
+++        port = $("#email_port").val();
+++        port = port.length > 0 ? port : null;
+++        tls  = $("#email_tls").attr('checked') !== undefined ? 1 : 0;
+++        from = $("#email_from").val();
+++        from = from.length > 0 ? from : 'root@localhost';
+++        user = $("#email_user").val().trim();
+++        pwd = $("#email_password").val();
+++        err = '';
+++        if (host === null) {
+++            err += '<li style="color: red;">You must specify an SMTP hostname!</li>';
+++        }
+++        if (port === null) {
+++            err += '<li style="color: red;">You must specify an SMTP port!</li>';
+++        } else if (port.match(/^\d+$/) === null || parseInt(port, 10) > 65535) {
+++            err += '<li style="color: red;">SMTP port must be between 0 and 65535!</li>';
+++        }
+++        if (err.length > 0) {
+++            err = '<ol>' + err + '</ol>';
+++            status.html(err);
+++        } else {
+++            to = prompt('Enter an email address to send the test to:', null);
+++            if (to === null || to.length === 0 || to.match(/.*@.*/) === null) {
+++                status.html('<p style="color: red;">You must provide a recipient email address!</p>');
+++            } else {
+++                $.get(sbRoot + "/home/testEmail", {host: host, port: port, smtp_from: from, use_tls: tls, user: user, pwd: pwd, to: to},
+++                    function (msg) { $('#testEmail-result').html(msg); });
+++            }
+++        }
+++    });
++   
++     $('#twitterStep1').click(function(){
++         $('#testTwitter-result').html(loading);
++@@ -142,4 +179,33 @@ $(document).ready(function(){
++         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
++         function (data){ $('#testNMA-result').html(data); });
++     });
+++
+++    $('#email_show').change(function () {
+++        var key = parseInt($('#email_show').val(), 10);
+++        $('#email_show_list').val(key >= 0 ? notify_data[key.toString()].list : '');
+++    });
+++
+++    // Update the internal data struct anytime settings are saved to the server
+++    $('#email_show').bind('notify', function () { load_show_notify_lists(); });
+++
+++    function load_show_notify_lists() {
+++        $.get(sbRoot + "/home/loadShowNotifyLists", function (data) {
+++            var list, html, s;
+++            list = $.parseJSON(data);
+++            notify_data = list;
+++            if (list._size === 0) {
+++                return;
+++            }
+++            html = '<option value="-1">-- Select --</option>';
+++            for (s in list) {
+++                if (s.charAt(0) !== '_') {
+++                    html += '<option value="' + list[s].id + '">' + $('<div/>').text(list[s].name).html() + '</option>';
+++                }
+++            }
+++            $('#email_show').html(html);
+++            $('#email_show_list').val('');
+++        });
+++    }
+++    // Load the per show notify lists everytime this page is loaded
+++    load_show_notify_lists();
++ });
++diff --git a/sickbeard/__init__.py b/sickbeard/__init__.py
++index 0338c50..8653acb 100755
++--- a/sickbeard/__init__.py
+++++ b/sickbeard/__init__.py
++@@ -229,6 +229,17 @@
++ PROWL_API = None
++ PROWL_PRIORITY = 0
++ 
+++USE_EMAIL = False
+++EMAIL_NOTIFY_ONSNATCH = False
+++EMAIL_NOTIFY_ONDOWNLOAD = False
+++EMAIL_HOST = None
+++EMAIL_PORT = 25
+++EMAIL_TLS = False
+++EMAIL_USER = None
+++EMAIL_PASSWORD = None
+++EMAIL_FROM = None
+++EMAIL_LIST = None
+++
++ USE_TWITTER = False
++ TWITTER_NOTIFY_ONSNATCH = False
++ TWITTER_NOTIFY_ONDOWNLOAD = False
++@@ -330,6 +341,7 @@ def initialize(consoleLogging=True):
++                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
++                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
++                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+++                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \
++                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
++                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
++                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
++@@ -603,6 +615,17 @@ def initialize(consoleLogging=True):
++         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
++         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
++ 
+++        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+++        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+++        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+++        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+++        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+++        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
+++        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+++        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+++        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+++        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
+++
++         CheckSection(CFG, 'Twitter')
++         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
++         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
++@@ -1076,6 +1099,18 @@ def save_config():
++     new_config['Prowl']['prowl_api'] = PROWL_API
++     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
++ 
+++    new_config['Email'] = {}
+++    new_config['Email']['use_email'] = int(USE_EMAIL)
+++    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+++    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+++    new_config['Email']['email_host'] = EMAIL_HOST
+++    new_config['Email']['email_port'] = int(EMAIL_PORT)
+++    new_config['Email']['email_tls'] = int(EMAIL_TLS)
+++    new_config['Email']['email_user'] = EMAIL_USER
+++    new_config['Email']['email_password'] = EMAIL_PASSWORD
+++    new_config['Email']['email_from'] = EMAIL_FROM
+++    new_config['Email']['email_list'] = EMAIL_LIST
+++
++     new_config['Twitter'] = {}
++     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
++     new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
++diff --git a/sickbeard/databases/mainDB.py b/sickbeard/databases/mainDB.py
++index 12d25ba..638aaa1 100644
++--- a/sickbeard/databases/mainDB.py
+++++ b/sickbeard/databases/mainDB.py
++@@ -536,3 +536,11 @@ def execute(self):
++         self.connection.action("DROP TABLE tmp_tv_shows")
++ 
++         self.incDBVersion()
+++
+++class AddEmailSubscriptionTable(FixAirByDateSetting):
+++    def test(self):
+++        return self.hasColumn("tv_shows", "notify_list")
+++    
+++    def execute(self):
+++        self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
+++        self.incDBVersion()
++diff --git a/sickbeard/notifiers/__init__.py b/sickbeard/notifiers/__init__.py
++index c78aaab..4dced97 100755
++--- a/sickbeard/notifiers/__init__.py
+++++ b/sickbeard/notifiers/__init__.py
++@@ -34,6 +34,7 @@
++ 
++ import tweet
++ import trakt
+++import emailnotify
++ 
++ from sickbeard.common import *
++ 
++@@ -54,6 +55,7 @@
++ # online
++ twitter_notifier = tweet.TwitterNotifier()
++ trakt_notifier = trakt.TraktNotifier()
+++email_notifier = emailnotify.EmailNotifier()
++ 
++ notifiers = [
++     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
++@@ -70,6 +72,7 @@
++     nma_notifier,
++     twitter_notifier,
++     trakt_notifier,
+++    email_notifier,
++ ]
++ 
++ 
++diff --git a/sickbeard/notifiers/emailnotify.py b/sickbeard/notifiers/emailnotify.py
++new file mode 100644
++index 0000000..ccdc71e
++--- /dev/null
+++++ b/sickbeard/notifiers/emailnotify.py
++@@ -0,0 +1,133 @@
+++# Author: Derek Battams <derek@battams.ca>
+++# URL: http://code.google.com/p/sickbeard/
+++#
+++# This file is part of Sick Beard.
+++#
+++# Sick Beard is free software: you can redistribute it and/or modify
+++# it under the terms of the GNU General Public License as published by
+++# the Free Software Foundation, either version 3 of the License, or
+++# (at your option) any later version.
+++#
+++# Sick Beard is distributed in the hope that it will be useful,
+++# but WITHOUT ANY WARRANTY; without even the implied warranty of
+++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+++#  GNU General Public License for more details.
+++#
+++# You should have received a copy of the GNU General Public License
+++# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+++
+++import smtplib
+++from email.mime.text import MIMEText
+++
+++import sickbeard
+++
+++from sickbeard import logger
+++from sickbeard import db
+++from sickbeard.exceptions import ex
+++
+++class EmailNotifier:
+++    def __init__(self):
+++        self.last_err = None
+++        
+++    def test_notify(self, host, port, smtp_from, use_tls, user, pwd, to):
+++        msg = MIMEText('This is a test message from Sick Beard.  If you\'re reading this, the test succeeded!')
+++        msg['Subject'] = 'Test Message from Sick Beard'
+++        msg['From'] = smtp_from
+++        msg['To'] = to
+++        return self._sendmail(host, port, smtp_from, use_tls, user, pwd, [to], msg, True)
+++
+++    def notify_snatch(self, ep_name, title="Snatched:"):
+++        """
+++        Send a notification that an episode was snatched
+++        
+++        ep_name: The name of the episode that was snatched
+++        title: The title of the notification (optional)
+++        """
+++        if sickbeard.EMAIL_NOTIFY_ONSNATCH:
+++            show = self._parseEp(ep_name)
+++            to = self._generate_recepients(show)
+++            if len(to) == 0:
+++                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+++            else:
+++                msg = MIMEText("'%s' snatched!" % ep_name)
+++                msg['Subject'] = 'Sick Beard has snatched a new episode!'
+++                msg['From'] = sickbeard.EMAIL_FROM
+++                msg['To'] = ','.join(to)
+++                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
+++                    logger.log("Snatch notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+++                else:
+++                    logger.log("Snatch notification ERROR: %s" % self.last_err, logger.ERROR)                
+++
+++    def notify_download(self, ep_name, title="Completed:"):
+++        """
+++        Send a notification that an episode was downloaded
+++        
+++        ep_name: The name of the episode that was downloaded
+++        title: The title of the notification (optional)
+++        """
+++        if sickbeard.EMAIL_NOTIFY_ONDOWNLOAD:
+++            show = self._parseEp(ep_name)
+++            to = self._generate_recepients(show)
+++            if len(to) == 0:
+++                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+++            else:
+++                msg = MIMEText("'%s' downloaded!" % ep_name)
+++                msg['Subject'] = 'Sick Beard has downloaded a new episode!'
+++                msg['From'] = sickbeard.EMAIL_FROM
+++                msg['To'] = ','.join(to)
+++                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
+++                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+++                else:
+++                    logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
+++
+++    def _generate_recepients(self, show):
+++        addrs = []
+++
+++        # Grab the global recipients
+++        for addr in sickbeard.EMAIL_LIST.split(','):
+++            if(len(addr.strip()) > 0):
+++                addrs.append(addr)
+++
+++        # Grab the recipients for the show
+++        mydb = db.DBConnection()
+++        for s in show:
+++            for subs in mydb.select("SELECT notify_list FROM tv_shows WHERE show_name = ?", (s,)):
+++                if subs['notify_list']:
+++                    for addr in subs['notify_list'].split(','):
+++                        if(len(addr.strip()) > 0):
+++                            addrs.append(addr)
+++                        
+++        addrs = set(addrs)
+++        logger.log('Notification recepients: %s' % addrs, logger.DEBUG)
+++        return addrs
+++    
+++    def _sendmail(self, host, port, smtp_from, use_tls, user, pwd, to, msg, smtpDebug=False):
+++        logger.log('HOST: %s; PORT: %s; FROM: %s, TLS: %s, USER: %s, PWD: %s, TO: %s' % (host, port, smtp_from, use_tls, user, pwd, to), logger.DEBUG)
+++        srv = smtplib.SMTP(host, int(port))
+++        if smtpDebug:
+++            srv.set_debuglevel(1)
+++        try:
+++            if (use_tls == '1' or use_tls == True) or (len(user) > 0 and len(pwd) > 0):
+++                srv.ehlo()
+++                logger.log('Sent initial EHLO command!', logger.DEBUG)
+++            if use_tls == '1' or use_tls == True:
+++                srv.starttls()
+++                logger.log('Sent STARTTLS command!', logger.DEBUG)
+++            if len(user) > 0 and len(pwd) > 0:
+++                srv.login(user, pwd)
+++                logger.log('Sent LOGIN command!', logger.DEBUG)
+++            srv.sendmail(smtp_from, to, msg.as_string())
+++            srv.quit()
+++            return True
+++        except Exception as e:
+++            self.last_err = '%s' % e
+++            return False
+++
+++    def _parseEp(self, ep_name):
+++        sep = " - "
+++        titles = ep_name.split(sep)
+++        titles.sort(key=len, reverse=True)
+++        logger.log("TITLES: %s" % titles, logger.DEBUG)
+++        return titles
+++        
+++notifier = EmailNotifier
++diff --git a/sickbeard/webserve.py b/sickbeard/webserve.py
++index 4f0e18a..3a57257 100644
++--- a/sickbeard/webserve.py
+++++ b/sickbeard/webserve.py
++@@ -1148,7 +1148,9 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
++                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
++                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
++                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
++-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+++                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+++                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None,
+++                          email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
++ 
++         results = []
++ 
++@@ -1226,6 +1228,31 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
++         else:
++             use_prowl = 0
++ 
+++        if email_notify_onsnatch == "on":
+++            email_notify_onsnatch = 1
+++        else:
+++            email_notify_onsnatch = 0
+++
+++        if email_notify_ondownload == "on":
+++            email_notify_ondownload = 1
+++        else:
+++            email_notify_ondownload = 0
+++
+++        if use_email == "on":
+++            use_email = 1
+++        else:
+++            use_email = 0
+++
+++        if email_tls == "on":
+++            email_tls = 1
+++        else:
+++            email_tls = 0
+++
+++        # Update per show notifications, if provided
+++        if int(email_show) >= 0:
+++            mydb = db.DBConnection()
+++            mydb.action("UPDATE tv_shows SET notify_list = ? WHERE show_id = ?", (email_show_list, int(email_show)))
+++
++         if twitter_notify_onsnatch == "on":
++             twitter_notify_onsnatch = 1
++         else:
++@@ -1362,6 +1389,17 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
++         sickbeard.PROWL_API = prowl_api
++         sickbeard.PROWL_PRIORITY = prowl_priority
++ 
+++        sickbeard.USE_EMAIL = use_email
+++        sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
+++        sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
+++        sickbeard.EMAIL_HOST = email_host
+++        sickbeard.EMAIL_PORT = email_port
+++        sickbeard.EMAIL_FROM = email_from
+++        sickbeard.EMAIL_TLS = email_tls
+++        sickbeard.EMAIL_USER = email_user
+++        sickbeard.EMAIL_PASSWORD = email_password
+++        sickbeard.EMAIL_LIST = email_list
+++
++         sickbeard.USE_TWITTER = use_twitter
++         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
++         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
++@@ -2023,6 +2061,29 @@ def testPushover(self, userKey=None):
++             return "Error sending Pushover notification"
++ 
++     @cherrypy.expose
+++    def loadShowNotifyLists(self):
+++        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+++
+++        mydb = db.DBConnection()
+++        rows = mydb.select("SELECT show_id, show_name, notify_list FROM tv_shows")
+++        data = {}
+++        size = 0
+++        for r in rows:
+++            data[r['show_id']] = {'id': r['show_id'], 'name': r['show_name'], 'list': r['notify_list']}
+++            size += 1
+++        data['_size'] = size
+++        return json.dumps(data)
+++        
+++    @cherrypy.expose
+++    def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
+++        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+++
+++        if notifiers.email_notifier.test_notify(host, port, smtp_from, use_tls, user, pwd, to):
+++            return 'Test email sent successfully! Check inbox.'
+++        else:
+++            return 'ERROR: %s' % notifiers.email_notifier.last_err
+++
+++    @cherrypy.expose
++     def twitterStep1(self):
++         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
++ 
++-- 
++1.7.10
++
+diff --git a/sickbeard/__init__.py b/sickbeard/__init__.py
+index 24ea3bd..cf3e98a 100755
+--- a/sickbeard/__init__.py
++++ b/sickbeard/__init__.py
+@@ -233,6 +233,17 @@
+ PROWL_API = None
+ PROWL_PRIORITY = 0
+ 
++USE_EMAIL = False
++EMAIL_NOTIFY_ONSNATCH = False
++EMAIL_NOTIFY_ONDOWNLOAD = False
++EMAIL_HOST = None
++EMAIL_PORT = 25
++EMAIL_TLS = False
++EMAIL_USER = None
++EMAIL_PASSWORD = None
++EMAIL_FROM = None
++EMAIL_LIST = None
++
+ USE_TWITTER = False
+ TWITTER_NOTIFY_ONSNATCH = False
+ TWITTER_NOTIFY_ONDOWNLOAD = False
+@@ -612,6 +623,17 @@ def initialize(consoleLogging=True):
+         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
+         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+ 
++        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
++        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
++        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
++        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
++        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
++        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
++        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
++        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
++        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
++        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
++
+         CheckSection(CFG, 'Twitter')
+         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
+         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
+@@ -1093,6 +1115,18 @@ def save_config():
+     new_config['Prowl']['prowl_api'] = PROWL_API
+     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+ 
++    new_config['Email'] = {}
++    new_config['Email']['use_email'] = int(USE_EMAIL)
++    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
++    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
++    new_config['Email']['email_host'] = EMAIL_HOST
++    new_config['Email']['email_port'] = int(EMAIL_PORT)
++    new_config['Email']['email_tls'] = int(EMAIL_TLS)
++    new_config['Email']['email_user'] = EMAIL_USER
++    new_config['Email']['email_password'] = EMAIL_PASSWORD
++    new_config['Email']['email_from'] = EMAIL_FROM
++    new_config['Email']['email_list'] = EMAIL_LIST
++
+     new_config['Twitter'] = {}
+     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
+     new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
+diff --git a/sickbeard/databases/mainDB.py b/sickbeard/databases/mainDB.py
+index 7c7e7c6..c487707 100644
+--- a/sickbeard/databases/mainDB.py
++++ b/sickbeard/databases/mainDB.py
+@@ -556,3 +556,11 @@ def execute(self):
+         self.connection.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) SELECT action, date, showid, season, episode, quality, resource, provider FROM tmp_history")
+         self.connection.action("DROP TABLE tmp_history")
+         self.incDBVersion()
++
++class AddEmailSubscriptionTable(FixAirByDateSetting):
++    def test(self):
++        return self.hasColumn("tv_shows", "notify_list")
++    
++    def execute(self):
++        self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
++        self.incDBVersion()
+diff --git a/sickbeard/notifiers/__init__.py b/sickbeard/notifiers/__init__.py
+index c78aaab..4dced97 100755
+--- a/sickbeard/notifiers/__init__.py
++++ b/sickbeard/notifiers/__init__.py
+@@ -34,6 +34,7 @@
+ 
+ import tweet
+ import trakt
++import emailnotify
+ 
+ from sickbeard.common import *
+ 
+@@ -54,6 +55,7 @@
+ # online
+ twitter_notifier = tweet.TwitterNotifier()
+ trakt_notifier = trakt.TraktNotifier()
++email_notifier = emailnotify.EmailNotifier()
+ 
+ notifiers = [
+     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
+@@ -70,6 +72,7 @@
+     nma_notifier,
+     twitter_notifier,
+     trakt_notifier,
++    email_notifier,
+ ]
+ 
+ 
+diff --git a/sickbeard/notifiers/emailnotify.py b/sickbeard/notifiers/emailnotify.py
+new file mode 100644
+index 0000000..ccdc71e
+--- /dev/null
++++ b/sickbeard/notifiers/emailnotify.py
+@@ -0,0 +1,133 @@
++# Author: Derek Battams <derek@battams.ca>
++# URL: http://code.google.com/p/sickbeard/
++#
++# This file is part of Sick Beard.
++#
++# Sick Beard is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++#
++# Sick Beard is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#  GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
++
++import smtplib
++from email.mime.text import MIMEText
++
++import sickbeard
++
++from sickbeard import logger
++from sickbeard import db
++from sickbeard.exceptions import ex
++
++class EmailNotifier:
++    def __init__(self):
++        self.last_err = None
++        
++    def test_notify(self, host, port, smtp_from, use_tls, user, pwd, to):
++        msg = MIMEText('This is a test message from Sick Beard.  If you\'re reading this, the test succeeded!')
++        msg['Subject'] = 'Test Message from Sick Beard'
++        msg['From'] = smtp_from
++        msg['To'] = to
++        return self._sendmail(host, port, smtp_from, use_tls, user, pwd, [to], msg, True)
++
++    def notify_snatch(self, ep_name, title="Snatched:"):
++        """
++        Send a notification that an episode was snatched
++        
++        ep_name: The name of the episode that was snatched
++        title: The title of the notification (optional)
++        """
++        if sickbeard.EMAIL_NOTIFY_ONSNATCH:
++            show = self._parseEp(ep_name)
++            to = self._generate_recepients(show)
++            if len(to) == 0:
++                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
++            else:
++                msg = MIMEText("'%s' snatched!" % ep_name)
++                msg['Subject'] = 'Sick Beard has snatched a new episode!'
++                msg['From'] = sickbeard.EMAIL_FROM
++                msg['To'] = ','.join(to)
++                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
++                    logger.log("Snatch notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
++                else:
++                    logger.log("Snatch notification ERROR: %s" % self.last_err, logger.ERROR)                
++
++    def notify_download(self, ep_name, title="Completed:"):
++        """
++        Send a notification that an episode was downloaded
++        
++        ep_name: The name of the episode that was downloaded
++        title: The title of the notification (optional)
++        """
++        if sickbeard.EMAIL_NOTIFY_ONDOWNLOAD:
++            show = self._parseEp(ep_name)
++            to = self._generate_recepients(show)
++            if len(to) == 0:
++                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
++            else:
++                msg = MIMEText("'%s' downloaded!" % ep_name)
++                msg['Subject'] = 'Sick Beard has downloaded a new episode!'
++                msg['From'] = sickbeard.EMAIL_FROM
++                msg['To'] = ','.join(to)
++                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
++                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
++                else:
++                    logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
++
++    def _generate_recepients(self, show):
++        addrs = []
++
++        # Grab the global recipients
++        for addr in sickbeard.EMAIL_LIST.split(','):
++            if(len(addr.strip()) > 0):
++                addrs.append(addr)
++
++        # Grab the recipients for the show
++        mydb = db.DBConnection()
++        for s in show:
++            for subs in mydb.select("SELECT notify_list FROM tv_shows WHERE show_name = ?", (s,)):
++                if subs['notify_list']:
++                    for addr in subs['notify_list'].split(','):
++                        if(len(addr.strip()) > 0):
++                            addrs.append(addr)
++                        
++        addrs = set(addrs)
++        logger.log('Notification recepients: %s' % addrs, logger.DEBUG)
++        return addrs
++    
++    def _sendmail(self, host, port, smtp_from, use_tls, user, pwd, to, msg, smtpDebug=False):
++        logger.log('HOST: %s; PORT: %s; FROM: %s, TLS: %s, USER: %s, PWD: %s, TO: %s' % (host, port, smtp_from, use_tls, user, pwd, to), logger.DEBUG)
++        srv = smtplib.SMTP(host, int(port))
++        if smtpDebug:
++            srv.set_debuglevel(1)
++        try:
++            if (use_tls == '1' or use_tls == True) or (len(user) > 0 and len(pwd) > 0):
++                srv.ehlo()
++                logger.log('Sent initial EHLO command!', logger.DEBUG)
++            if use_tls == '1' or use_tls == True:
++                srv.starttls()
++                logger.log('Sent STARTTLS command!', logger.DEBUG)
++            if len(user) > 0 and len(pwd) > 0:
++                srv.login(user, pwd)
++                logger.log('Sent LOGIN command!', logger.DEBUG)
++            srv.sendmail(smtp_from, to, msg.as_string())
++            srv.quit()
++            return True
++        except Exception as e:
++            self.last_err = '%s' % e
++            return False
++
++    def _parseEp(self, ep_name):
++        sep = " - "
++        titles = ep_name.split(sep)
++        titles.sort(key=len, reverse=True)
++        logger.log("TITLES: %s" % titles, logger.DEBUG)
++        return titles
++        
++notifier = EmailNotifier
+diff --git a/sickbeard/webserve.py b/sickbeard/webserve.py
+index 9c5b6a8..56bf923 100644
+--- a/sickbeard/webserve.py
++++ b/sickbeard/webserve.py
+@@ -1178,7 +1178,9 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
+                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
+-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
++                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
++                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None,
++                          email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
+ 
+         results = []
+ 
+@@ -1256,6 +1258,31 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
+         else:
+             use_prowl = 0
+ 
++       if email_notify_onsnatch == "on":
++            email_notify_onsnatch = 1
++        else:
++            email_notify_onsnatch = 0
++
++        if email_notify_ondownload == "on":
++            email_notify_ondownload = 1
++        else:
++            email_notify_ondownload = 0
++
++        if use_email == "on":
++            use_email = 1
++        else:
++            use_email = 0
++
++        if email_tls == "on":
++            email_tls = 1
++        else:
++            email_tls = 0
++
++        # Update per show notifications, if provided
++        if int(email_show) >= 0:
++            mydb = db.DBConnection()
++            mydb.action("UPDATE tv_shows SET notify_list = ? WHERE show_id = ?", (email_show_list, int(email_show)))
++
+         if twitter_notify_onsnatch == "on":
+             twitter_notify_onsnatch = 1
+         else:
+@@ -1392,6 +1419,17 @@ def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notif
+         sickbeard.PROWL_API = prowl_api
+         sickbeard.PROWL_PRIORITY = prowl_priority
+ 
++        sickbeard.USE_EMAIL = use_email
++        sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
++        sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
++        sickbeard.EMAIL_HOST = email_host
++        sickbeard.EMAIL_PORT = email_port
++        sickbeard.EMAIL_FROM = email_from
++        sickbeard.EMAIL_TLS = email_tls
++        sickbeard.EMAIL_USER = email_user
++        sickbeard.EMAIL_PASSWORD = email_password
++        sickbeard.EMAIL_LIST = email_list
++
+         sickbeard.USE_TWITTER = use_twitter
+         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
+         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+@@ -2060,6 +2098,31 @@ def testPushover(self, userKey=None):
+             return "Error sending Pushover notification"
+ 
+     @cherrypy.expose
++
++    def loadShowNotifyLists(self):
++        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
++
++        mydb = db.DBConnection()
++        rows = mydb.select("SELECT show_id, show_name, notify_list FROM tv_shows")
++        data = {}
++        size = 0
++        for r in rows:
++            data[r['show_id']] = {'id': r['show_id'], 'name': r['show_name'], 'list': r['notify_list']}
++            size += 1
++        data['_size'] = size
++        return json.dumps(data)
++        
++    @cherrypy.expose
++    def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
++        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
++
++        if notifiers.email_notifier.test_notify(host, port, smtp_from, use_tls, user, pwd, to):
++            return 'Test email sent successfully! Check inbox.'
++        else:
++            return 'ERROR: %s' % notifiers.email_notifier.last_err
++
++    @cherrypy.expose
++
+     def twitterStep1(self):
+         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+ 
+-- 
+1.7.10
+
