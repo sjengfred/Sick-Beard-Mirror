@@ -548,8 +548,8 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
-		
-	KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
+	
+        KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
 
         CheckSection(CFG, 'NZBs')
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
