@@ -1033,8 +1033,9 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
+                      btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
+                      torrentz_verified=None,
                       provider_order=None):
 
         results = []
@@ -1100,6 +1101,8 @@ class ConfigProviders:
                 sickbeard.BTN = curEnabled
             elif curProvider == 'kickass':
                 sickbeard.KICKASS = curEnabled
+            elif curProvider == 'torrentz':
+                sickbeard.TORRENTZ = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1250,6 +1253,13 @@ class ConfigNotifications:
             email_tls = 1
         else:
             email_tls = 0
+
+        if torrentz_verified == "on":
+            torrentz_verified = 1
+        else:
+            torrentz_verified = 0
+        
+        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
 
         # Update per show notifications, if provided
         if int(email_show) >= 0:

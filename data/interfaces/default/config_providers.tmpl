@@ -62,7 +62,7 @@
                             <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" then "**" else ""#
+                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "torrentz"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -165,6 +165,16 @@
                             </label>
                         </div>
                     </div><!-- /btnDiv //-->
+
+                    <div class="providerDiv" id="torrentzDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="torrentz_verified" id="torrentz_verified" #if $sickbeard.TORRENTZ_VERIFIED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="torrentz_verified">
+                                <span class="component-title">Only Verified</span>
+                                <span class="component-desc">Download only verified torrents?</span>
+                            </label>
+                        </div>
+                    </div><!-- /torrentzDiv //-->
 
 <!-- end div for editing providers -->
 
