@@ -30,9 +30,8 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, kickass, torrentz
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
-
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
@@ -160,6 +159,10 @@ TVTORRENTS_HASH = None
 
 TORRENTLEECH = False
 TORRENTLEECH_KEY = None
+KICKASS = False
+
+TORRENTZ = False
+TORRENTZ_VERIFIED = False
 
 BTN = False
 BTN_API_KEY = None
@@ -205,6 +208,7 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = ''
 
+NZBGET_USERNAME = None
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
@@ -239,6 +243,17 @@ PROWL_NOTIFY_ONSNATCH = False
 PROWL_NOTIFY_ONDOWNLOAD = False
 PROWL_API = None
 PROWL_PRIORITY = 0
+
+USE_EMAIL = False
+EMAIL_NOTIFY_ONSNATCH = False
+EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_HOST = None
+EMAIL_PORT = 25
+EMAIL_TLS = False
+EMAIL_USER = None
+EMAIL_PASSWORD = None
+EMAIL_FROM = None
+EMAIL_LIST = None
 
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
@@ -326,13 +341,14 @@ def initialize(consoleLogging=True):
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
+		  KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -551,6 +567,11 @@ def initialize(consoleLogging=True):
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
 
+        KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
+
+        TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
+        TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))
+
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
         TORRENTLEECH_KEY = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_key', '')
@@ -595,7 +616,8 @@ def initialize(consoleLogging=True):
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
         CheckSection(CFG, 'NZBget')
-        NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
+	NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', 'xbian')
+        NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'raspberry')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
@@ -633,6 +655,17 @@ def initialize(consoleLogging=True):
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+
+        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
+        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
 
         CheckSection(CFG, 'Twitter')
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
@@ -1040,6 +1073,13 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
 
+    new_config['KICKASS'] = {}
+    new_config['KICKASS']['kickass'] = int(KICKASS)	
+
+    new_config['TORRENTZ'] = {}
+    new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
+    new_config['TORRENTZ']['torrentz_verified'] = int(TORRENTZ_VERIFIED)
+
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
@@ -1088,6 +1128,7 @@ def save_config():
     new_config['SABnzbd']['sab_host'] = SAB_HOST
 
     new_config['NZBget'] = {}
+    new_config['NZBget']['nzbget_username'] = NZBGET_USERNAME
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
@@ -1126,6 +1167,18 @@ def save_config():
     new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+
+    new_config['Email'] = {}
+    new_config['Email']['use_email'] = int(USE_EMAIL)
+    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_host'] = EMAIL_HOST
+    new_config['Email']['email_port'] = int(EMAIL_PORT)
+    new_config['Email']['email_tls'] = int(EMAIL_TLS)
+    new_config['Email']['email_user'] = EMAIL_USER
+    new_config['Email']['email_password'] = EMAIL_PASSWORD
+    new_config['Email']['email_from'] = EMAIL_FROM
+    new_config['Email']['email_list'] = EMAIL_LIST
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)

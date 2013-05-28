@@ -141,7 +141,9 @@ class NumericProviders (AddAirdateIndex):
                 4: 'eztv',
                 5: 'nzbmatrix',
                 6: 'tvnzb',
-                7: 'ezrss'}
+                7: 'ezrss',
+                8: 'kickass',
+                9: 'torrentz'}
 
     def execute(self):
         self.connection.action("ALTER TABLE history RENAME TO history_old")
@@ -542,7 +544,6 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
-
 class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """Add support for 1080p related qualities along with RawHD
 
@@ -666,3 +667,12 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         # cleanup and reduce db if any previous data was removed
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
+
+class AddEmailSubscriptionTable(FixAirByDateSetting):
+    def test(self):
+        return self.hasColumn("tv_shows", "notify_list")
+    
+    def execute(self):
+        self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
+        self.incDBVersion()
+
